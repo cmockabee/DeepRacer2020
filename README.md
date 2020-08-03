@@ -6,6 +6,7 @@
 Developers of all skill levels can get hands on with machine learning through a cloud based 3D racing simulator, fully autonomous 1/18th scale race car driven by reinforcement learning, and global racing league.
 
 [Introduction to DeepRacer](https://aws.amazon.com/deepracer/)
+
 [AWS DeepRacer console](https://console.aws.amazon.com/deepracer/home?region=us-east-1#welcome)
 
 ## Requirements
