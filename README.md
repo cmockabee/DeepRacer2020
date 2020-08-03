@@ -11,7 +11,7 @@ Developers of all skill levels can get hands on with machine learning through a 
 ## Requirements
 To get started with DeepRacer:
 - Create an AWS account ([AWS](https://console.aws.amazon.com/console/))
-- Create an DeepRacer user account ([AWS DeepRacer console](https://console.aws.amazon.com/deepracer/home?region=us-east-1#welcome))
+- Create a DeepRacer user account ([AWS DeepRacer console](https://console.aws.amazon.com/deepracer/home?region=us-east-1#welcome))
 
 ## Strategy
 DeepRacer uses reinforcement learning to train the car, meaning the car's success is contingent on how well it is rewarded or penalized for its behavior during training runs.
