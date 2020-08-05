@@ -35,12 +35,12 @@ def reward_function(params):
         reward *= 0.5
 
     # Calculate optimal point on a curve
-    optimal_point = optimal_point(closest_waypoints[0], next_point, prev_point, 1)
+    optimal_point = optimal_point(closest_waypoints[0], next_point, prev_point, 1, params['track_width'])
 
     return reward
 
 
-def optimal_point(closest_waypoint, next_point, prev_point, edge_buffer):
+def optimal_point(closest_waypoint, next_point, prev_point, edge_buffer, width_of_track):
     ###############################################################################
     '''
     Calculating the optimal point to cut curves
