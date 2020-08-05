@@ -5,6 +5,7 @@ def reward_function(params):
     '''
 
     import math
+    import statistics
 
     # ***** Parameters & Minor calculations *****
     waypoints = params['waypoints']  # list of (x,y)
@@ -18,64 +19,92 @@ def reward_function(params):
     closest_prev_point = waypoints[closest_waypoints[0]]
     closest_next_point = waypoints[closest_waypoints[1]]
 
-    # define some 'arbitrary' values
-    reward = 1.0
-    line_of_sight = 3 # net line of site related to waypoints
-
-
-
-    # ***** Helper Functions *****
-    def distance(car_x, car_y, waypoint):
-        """distance calculates the distance between the car and given waypoint
-        """
-        x_ = math.pow((car_x - waypoint[0]), 2)
-        y_= math.pow((car_y - waypoint[1]), 2)
-        return math.sqrt(x_ + y_)
-
-    def drift(points):
-        x_drift = 0
-        y_drift = 0
-
-        for i in range(len(points)):
-            if i == (len(points) - 1):
-                break
-            next_elem = points[(i + 1)]
-
-            diff_x = point[i][0] - next_elem[0]
-            diff_y = point[i][1] - next_elem[1]
-
-            if diff_x == 0 or diff_y == 0:
-
-    # **** Param: Speed *****
     distance_way_1 = distance(car_x=x_, car_y=y_, waypoint=closest_prev_point)
     distance_way_2 = distance(car_x=x_, car_y=y_, waypoint=closest_next_point)
 
-    closest_waypoint = closest_prev_point if distance_way_1 < distance_way_2 else closest_next_point
+    if distance_way_1 < distance_way_2:
+        closest_waypoint = closest_prev_point
+        closest_index = closest_waypoints[0]
+    else:
+        closest_waypoint = closest_next_point
+        closest_index = closest_waypoint[1]
 
+    # define some 'arbitrary' values
+    reward = 1.0
+    line_of_sight = 5 # net line of site related to waypoints
+
+    # **** Param: Speed *****
     # calculate the optimal speed given the waypoints ahead
-    def optimal_speed(line_of_sight, waypoints, closest_index):
-        """optimal_speed
-        """
-        # this is gonna be kinda arbitrary
-        return 0
+    optimal_speed = optimal_speed(waypoints=waypoints, line_of_sight=line_of_sight,
+                                index=closest_index)
 
-
-    # Calculate the direction in radius, arctan2(dy, dx), the result is (-pi, pi) in radians
-    track_direction = math.atan2(next_point[1] - prev_point[1], next_point[0] - prev_point[0])
-
-    # Convert to degree
-    track_direction = math.degrees(track_direction)
-
-
-    #
-
+    # ***** Param: Optimal Point *****
     # Calculate optimal point on a curve
-    optimal_point = optimal_point(closest_waypoints[0], next_point, prev_point, 1, params['track_width'])
+    ai = closest_index + line_of_sight
+    if ai >= len(waypoints):
+        ai = len(waypoints) - 1
+
+
+    bi = closest_index - line_of_sight
+    if bi < 0:
+        bi = 0
+
+    optimal_point = optimal_point(closest_waypoint=closest_waypoint,
+                                next_point=waypoints[ai], prev_point=waypoints[bi],
+                                buffer=1, width_of_track-params['track_width'])
+
+    # ***** Reward Calculations *****
+    if not wheels_on_track:
+        # lolz keep them wheelz on the track
+        reward -= 100
+
+    # TODO
 
     return reward
 
 
-def optimal_point(closest_waypoint, next_point, prev_point, edge_buffer, width_of_track):
+def distance(car_x, car_y, waypoint):
+    ###############################################################################
+    """distance calculates the distance between the car and given waypoint
+    """
+    x_ = math.pow((car_x - waypoint[0]), 2)
+    y_= math.pow((car_y - waypoint[1]), 2)
+    return math.sqrt(x_ + y_)
+
+
+def r_squared(points):
+    ###############################################################################
+    xs = []
+    ys = []
+
+    for point in points:
+        xs.append(point[0])
+        ys.append(point[1])
+
+    slope = (((statistics.mean(xs)*statistics.mean(ys)) - statistics.mean(xs*ys)) /
+         ((statistics.mean(xs)*statistics.mean(xs)) - statistics.mean(xs*xs)))
+
+    intercept = statistics.mean(ys) - slope*statistics.mean(xs)
+
+    best_fit_line = []
+    for x in xs:
+        best_fit_line.append(((slope*x) + intercept))
+
+    def squared_error(ys_orig, ys_line):
+        return sum((ys_line - ys_orig) * (ys_line - ys_orig))
+
+    y_orig_mean = statistics.mean(ys)
+    y__mean_line = []
+    for y in ys:
+        y__mean_line.append(y_orig_mean)
+
+    squared_error_regr = squared_error(ys, best_fit_line)
+    squared_error_y_mean = squared_error(ys, y_mean_line)
+
+    return 1 - (squared_error_regr/squared_error_y_mean)
+
+
+def optimal_point(closest_waypoint, next_point, prev_point, buffer, width_of_track):
     ###############################################################################
     '''
     Calculating the optimal point to cut curves
@@ -93,15 +122,54 @@ def optimal_point(closest_waypoint, next_point, prev_point, edge_buffer, width_o
 
     # Vertical curve - rare case that would otherwise cause undefined slope
     elif closest_waypoint[0] == midpoint[0]:
-        new_d = d - width_of_track / 2 - edge_buffer
+        new_d = d - width_of_track / 2 - buffer
         optimal_point = (closest_waypoint[0], closest_waypoint[1] + new_d)
 
     # Typical case - find new points closer to edge to cut curve
     else:
         m = (closest_waypoint[1] - midpoint[1]) / (closest_waypoint[0] - midpoint[0])
-        new_d = width_of_track / 2 - edge_buffer
+        new_d = width_of_track / 2 - buffer
         c = 1 / math.sqrt(1 + m**2)
         s = m / math.sqrt(1 + m**2)
         optimal_point = (closest_waypoint[0] + new_d * c, closest_waypoint[1] + new_d * s)
 
     return optimal_point
+
+
+def optimal_speed(waypoints, line_of_sight, index):
+    ###############################################################################
+    """
+    optimal_speed
+    """
+    # Set speed suggestions
+    LOW_SPEED = 10
+    FIRST_GEAR = 20
+    SECOND_GEAR = 25
+    THIRD_GEAR = 30
+    FOURTH_GEAR = 35
+    FIFTH_GEAR = 40
+    ECO_BOOST = 45
+    MAX_SPEED = 50
+
+    next_index = index + line_of_sight
+    next_index = (len(waypoints) - 1) if next_index >= len(waypoints) else next_index
+    points_ahead = waypoints[index:next_index]
+
+    r_squared = r_squared(points=points_ahead)
+
+    if r_squared < 0.40:
+        return LOW_SPEED
+    elif r_squared < 0.60:
+        return FIRST_GEAR
+    elif r_squared < 0.70:
+        return SECOND_GEAR
+    elif r_squared < 0.80:
+        return THIRD_GEAR
+    elif r_squared < 0.85:
+        return FOURTH_GEAR
+    elif r_squared < 0.90:
+        return FIFTH_GEAR
+    elif r_squared < 0.95
+        return ECO_BOOST
+
+    return MAX_SPEED
