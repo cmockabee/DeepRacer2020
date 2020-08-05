@@ -58,7 +58,7 @@ def optimal_point(closest_waypoint, next_point, prev_point, edge_buffer, width_o
 
     # Vertical curve - rare case that would otherwise cause undefined slope
     elif closest_waypoint[0] == midpoint[0]:
-        new_d = d - width_of_track / 2
+        new_d = d - width_of_track / 2 - edge_buffer
         optimal_point = (closest_waypoint[0], closest_waypoint[1] + new_d)
 
     # Typical case - find new points closer to edge to cut curve    
