@@ -23,9 +23,25 @@ def reward_function(params):
             return 50
         elif distance_to_optimal >= 0.2:
             return 60
-        elif distance_to_optimal < 0.2:
-            return 110
+        return 110
 
+    # ***** Function: Reward for falling in the range of optimal speed *****
+    def speed_reward(diff_between_speeds):
+        if diff_between_speeds > 20:
+            return 0
+        elif diff_between_speeds > 15:
+            return 10
+        elif diff_between_speeds > 10:
+            return 20
+        elif diff_between_speeds > 7:
+            return 30
+        elif diff_between_speeds > 6:
+            return 40
+        elif diff_between_speeds > 5:
+            return 50
+        elif diff_between_speeds > 4:
+            return 60
+        return 70 # don't jump the speed reward like the position reward
 
     # ***** Parameters & Minor calculations *****
     waypoints = params['waypoints']  # list of (x,y)
@@ -58,6 +74,8 @@ def reward_function(params):
     optimal_speed = optimal_speed(waypoints=waypoints, line_of_sight=line_of_sight,
                                 index=closest_index)
 
+    diff_in_speeds = abs(optimal_speed - curr_speed)
+
     # ***** Param: Optimal Point *****
     # Calculate optimal point on a curve
     ai = closest_index + line_of_sight
@@ -74,7 +92,6 @@ def reward_function(params):
 
     distance_to_optimal = distance(x_, y_, optimal_point)
 
-
     # ***** Reward Calculations *****
     if not wheels_on_track:
         # lolz keep them wheelz on the track
@@ -83,7 +100,8 @@ def reward_function(params):
     # Positional Reward
     reward += position_reward(distance_to_optimal)
 
-    # TODO
+    # Speed Reward
+    reward += speed_reward(diff_between_speeds=diff_in_speeds)
 
     return reward
 
