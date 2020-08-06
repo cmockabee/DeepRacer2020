@@ -109,12 +109,16 @@ def r_squared(points):
         best_fit_line.append(((slope*x) + intercept))
 
     def squared_error(ys_orig, ys_line):
-        return sum((ys_line - ys_orig) * (ys_line - ys_orig))
+        sum = 0
+        for (yo, ym) in zip(ys_orig, ys_line):
+            sum += math.pow((yo - ym), 2)
+
+        return sum
 
     y_orig_mean = statistics.fmean(ys)
-    y__mean_line = []
+    y_mean_line = []
     for y in ys:
-        y__mean_line.append(y_orig_mean)
+        y_mean_line.append(y_orig_mean)
 
     squared_error_regr = squared_error(ys, best_fit_line)
     squared_error_y_mean = squared_error(ys, y_mean_line)
