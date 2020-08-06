@@ -1,5 +1,4 @@
 import math
-import statistics
 
 def reward_function(params):
     ###############################################################################
@@ -106,6 +105,15 @@ def reward_function(params):
     return reward
 
 
+def mean(data):
+    i = 0
+    agg = 0
+    for elem in data:
+        i += 1
+        agg += elem
+    return (agg / i)
+
+
 def distance(car_x, car_y, waypoint):
     ###############################################################################
     """distance calculates the distance between the car and given waypoint
@@ -124,14 +132,14 @@ def line_of_best_fit(xs, ys):
     for x in xs:
         x_mult.append(x*x)
 
-    x_mean = statistics.fmean(xs)
-    y_mean = statistics.fmean(ys)
-    mult_mean = statistics.fmean(x_y_mult)
-    x_mult_mean = statistics.fmean(x_mult)
+    x_mean = mean(xs)
+    y_mean = mean(ys)
+    mult_mean = mean(x_y_mult)
+    x_mult_mean = mean(x_mult)
 
     slope = (((x_mean*y_mean) - mult_mean) / ((x_mean*x_mean) - x_mult_mean))
 
-    intercept = statistics.fmean(ys) - slope*statistics.fmean(xs)
+    intercept = mean(ys) - slope*mean(xs)
 
     return slope, intercept
 
@@ -158,13 +166,15 @@ def r_squared(points):
 
         return sum
 
-    y_orig_mean = statistics.fmean(ys)
+    y_orig_mean = mean(ys)
     y_mean_line = []
     for y in ys:
         y_mean_line.append(y_orig_mean)
 
     squared_error_regr = squared_error(ys, best_fit_line)
     squared_error_y_mean = squared_error(ys, y_mean_line)
+
+    squared_error_y_mean = 0.000001 if squared_error_y_mean == 0 else squared_error_y_mean
 
     return 1 - (squared_error_regr/squared_error_y_mean)
 

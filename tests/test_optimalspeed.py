@@ -1,6 +1,16 @@
 import math
-from DeepRacer2020 import optimal_speed, distance, r_squared, line_of_best_fit
+from DeepRacer2020 import optimal_speed, distance, r_squared, line_of_best_fit, mean
 
+def test_mean():
+    set_1 = [5,5,5,5,5,5]
+    mean_1 = mean(set_1)
+
+    assert mean_1 == 5
+
+    set_2 = [3, 5, 7, 9, 11]
+    mean_2 = mean(set_2)
+
+    assert mean_2 == 7
 
 def test_distance():
     x_1 = 3
