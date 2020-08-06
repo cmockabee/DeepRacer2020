@@ -34,7 +34,7 @@ def test_optimalpath():
 		optimal_point = (closest_waypoint[0] + new_d * c, closest_waypoint[1] + new_d * s)
 
 
-	
+
 	print(f"Distance from midpoint to closest_waypoint: {d}")
 	print(f"Optimal Point: {optimal_point}")
 	return optimal_point
