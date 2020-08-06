@@ -177,21 +177,21 @@ def optimal_speed(waypoints, line_of_sight, index):
     next_index = (len(waypoints) - 1) if next_index >= len(waypoints) else next_index
     points_ahead = waypoints[index:next_index]
 
-    r_squared = r_squared(points=points_ahead)
+    r_value = r_squared(points=points_ahead)
 
-    if r_squared < 0.40:
+    if r_value < 0.40:
         return LOW_SPEED
-    elif r_squared < 0.60:
+    elif r_value < 0.60:
         return FIRST_GEAR
-    elif r_squared < 0.70:
+    elif r_value < 0.70:
         return SECOND_GEAR
-    elif r_squared < 0.80:
+    elif r_value < 0.80:
         return THIRD_GEAR
-    elif r_squared < 0.85:
+    elif r_value < 0.85:
         return FOURTH_GEAR
-    elif r_squared < 0.90:
+    elif r_value < 0.90:
         return FIFTH_GEAR
-    elif r_squared < 0.95:
+    elif r_value < 0.95:
         return ECO_BOOST
 
     return MAX_SPEED

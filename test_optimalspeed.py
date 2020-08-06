@@ -40,6 +40,7 @@ def test_line_of_best_fit():
     assert round(slope_2, 6) == 0.407214
     assert round(intercept_2, 6) == 1.324216
 
+
 def test_r_squared():
     points_1 = [[0,0], [1, 1], [2, 2], [3,3]]
     r_1 = r_squared(points=points_1)
@@ -50,3 +51,17 @@ def test_r_squared():
     r_2 = r_squared(points=points_2)
 
     assert round(r_2, 5) == 0.84667
+
+
+def test_optimal_speed():
+    sight_1 = 3
+    points_1 = [[0,0], [1, 1], [2, 2], [3,3]]
+    speed_1 = optimal_speed(waypoints=points_1, line_of_sight=sight_1, index=0)
+
+    assert speed_1 == 50
+
+    sight_2 = 9
+    points_2 = [[0, 1], [2,3], [5, 8], [22, 9], [24, 15], [52, 23], [32, 13], [13, 1], [0, 0]]
+    speed_2 = optimal_speed(waypoints=points_2, line_of_sight=sight_2, index=0)
+
+    assert speed_2 == 35
