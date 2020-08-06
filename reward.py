@@ -86,11 +86,11 @@ def reward_function(params):
     if bi < 0:
         bi = 0
 
-    op = optimal_point(closest_waypoint=closest_waypoint,
+    best_point = optimal_point(closest_waypoint=closest_waypoint,
                                 next_point=waypoints[ai], prev_point=waypoints[bi],
                                 buffer=1, width_of_track=params['track_width'])
 
-    distance_to_optimal = distance(x_, y_, op)
+    distance_to_optimal = distance(car_x=x_, car_y=y_, waypoint=best_point)
 
     # ***** Reward Calculations *****
     if not wheels_on_track:
