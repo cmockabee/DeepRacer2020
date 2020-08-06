@@ -7,6 +7,26 @@ def reward_function(params):
     Super Fast Reward function (or not....)
     '''
 
+    # ***** Function: Reward for proximity to optimal position *****
+    def position_reward(distance_to_optimal):
+        if distance_to_optimal >= 2.6:
+            return 0
+        elif distance_to_optimal >= 2.2:
+            return 10
+        elif distance_to_optimal >= 1.8:
+            return 20
+        elif distance_to_optimal >= 1.4:
+            return 30
+        elif distance_to_optimal >= 1.0:
+            return 40
+        elif distance_to_optimal >= 0.6:
+            return 50
+        elif distance_to_optimal >= 0.2:
+            return 60
+        elif distance_to_optimal < 0.2:
+            return 110
+
+
     # ***** Parameters & Minor calculations *****
     waypoints = params['waypoints']  # list of (x,y)
     closest_waypoints = params['closest_waypoints'] # indices of the two closest waypoints
@@ -44,7 +64,6 @@ def reward_function(params):
     if ai >= len(waypoints):
         ai = len(waypoints) - 1
 
-
     bi = closest_index - line_of_sight
     if bi < 0:
         bi = 0
@@ -53,10 +72,16 @@ def reward_function(params):
                                 next_point=waypoints[ai], prev_point=waypoints[bi],
                                 buffer=1, width_of_track=params['track_width'])
 
+    distance_to_optimal = distance(x_, y_, optimal_point)
+
+
     # ***** Reward Calculations *****
     if not wheels_on_track:
         # lolz keep them wheelz on the track
         reward -= 100
+
+    # Positional Reward
+    reward += position_reward(distance_to_optimal)
 
     # TODO
 
