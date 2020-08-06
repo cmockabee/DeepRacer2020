@@ -23,8 +23,7 @@ def reward_function(params):
             return 50
         elif distance_to_optimal >= 0.2:
             return 60
-        elif distance_to_optimal < 0.2:
-            return 110
+        return 110
 
 
     # ***** Parameters & Minor calculations *****
