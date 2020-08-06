@@ -7,6 +7,7 @@ def reward_function(params):
     Super Fast Reward function (or not....)
     '''
 
+    # ***** Function: Reward for proximity to optimal position *****
     def position_reward(distance_to_optimal):
         if distance_to_optimal >= 2.6:
             return 0
