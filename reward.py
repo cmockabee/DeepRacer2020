@@ -7,38 +7,30 @@ def reward_function(params):
     '''
 
     # ***** Function: Reward for proximity to optimal position *****
-    def position_reward(distance_to_optimal):
-        if distance_to_optimal >= 2.6:
-            return 0
-        elif distance_to_optimal >= 2.2:
-            return 10
-        elif distance_to_optimal >= 1.8:
-            return 20
-        elif distance_to_optimal >= 1.4:
-            return 30
-        elif distance_to_optimal >= 1.0:
-            return 40
-        elif distance_to_optimal >= 0.6:
-            return 50
-        elif distance_to_optimal >= 0.2:
+    def position_reward(distance_to_optimal, width_of_track, wheels_on_track):
+        if distance_to_optimal <= .1 * width_of_track and wheels_on_track:
             return 60
-        return 110
+        elif distance_to_optimal <= 0.25 * width_of_track and wheels_on_track:
+            return 30
+        elif distance_to_optimal <= 0.5 * width_of_track and wheels_on_track:
+            return 6
+        return 0
 
     # ***** Function: Reward for falling in the range of optimal speed *****
     def speed_reward(diff_between_speeds):
-        if diff_between_speeds > 20:
+        if diff_between_speeds > 2.0:
             return 0
-        elif diff_between_speeds > 15:
+        elif diff_between_speeds > 1.5:
             return 10
-        elif diff_between_speeds > 10:
+        elif diff_between_speeds > 1.0:
             return 20
-        elif diff_between_speeds > 7:
+        elif diff_between_speeds > 0.7:
             return 30
-        elif diff_between_speeds > 6:
+        elif diff_between_speeds > 0.6:
             return 40
-        elif diff_between_speeds > 5:
+        elif diff_between_speeds > 0.4:
             return 50
-        elif diff_between_speeds > 4:
+        elif diff_between_speeds > 0.3:
             return 60
         return 70 # don't jump the speed reward like the position reward
 
@@ -66,27 +58,28 @@ def reward_function(params):
 
     # define some 'arbitrary' values
     reward = 1.0
-    line_of_sight = 5 # net line of site related to waypoints
+    line_of_sight_speed = 12 # net line of site related to waypoints
+    line_of_sight_position = 7 
 
     # **** Param: Speed *****
     # calculate the optimal speed given the waypoints ahead
-    best_speed = optimal_speed(waypoints=waypoints, line_of_sight=line_of_sight,
+    best_speed = optimal_speed(waypoints=waypoints, line_of_sight=line_of_sight_speed,
                                 index=closest_index)
 
     diff_in_speeds = abs(best_speed - curr_speed)
 
     # ***** Param: Optimal Point *****
     # Calculate optimal point on a curve
-    ai = closest_index + line_of_sight
+    ai = closest_index + line_of_sight_position
     if ai >= len(waypoints):
         ai = len(waypoints) - 1
 
-    bi = closest_index - line_of_sight
+    bi = closest_index - line_of_sight_position
     if bi < 0:
         bi = 0
 
     best_point = optimal_point(closest_waypoint=closest_waypoint,
-                                next_point=waypoints[ai], prev_point=waypoints[bi],
+                                next_point=waypoints[int(ai)], prev_point=waypoints[int(bi)],
                                 buffer=1, width_of_track=params['track_width'])
 
     distance_to_optimal = distance(car_x=x_, car_y=y_, waypoint=best_point)
@@ -97,7 +90,7 @@ def reward_function(params):
         reward -= 100
 
     # Positional Reward
-    reward += position_reward(distance_to_optimal)
+    reward += position_reward(distance_to_optimal=distance_to_optimal, width_of_track=params['track_width'], wheels_on_track=wheels_on_track)
 
     # Speed Reward
     reward += speed_reward(diff_between_speeds=diff_in_speeds)
@@ -137,7 +130,9 @@ def line_of_best_fit(xs, ys):
     mult_mean = mean(x_y_mult)
     x_mult_mean = mean(x_mult)
 
-    slope = (((x_mean*y_mean) - mult_mean) / ((x_mean*x_mean) - x_mult_mean))
+    denominator = 9999999 if ((x_mean*x_mean) - x_mult_mean) == 0 else ((x_mean*x_mean) - x_mult_mean)
+
+    slope = (((x_mean*y_mean) - mult_mean) / denomitor)
 
     intercept = mean(ys) - slope*mean(xs)
 
@@ -217,18 +212,18 @@ def optimal_speed(waypoints, line_of_sight, index):
     optimal_speed
     """
     # Set speed suggestions
-    LOW_SPEED = 10
-    FIRST_GEAR = 20
-    SECOND_GEAR = 25
-    THIRD_GEAR = 30
-    FOURTH_GEAR = 35
-    FIFTH_GEAR = 40
-    ECO_BOOST = 45
-    MAX_SPEED = 50
+    LOW_SPEED = 0.5
+    FIRST_GEAR = 0.7
+    SECOND_GEAR = 0.9
+    THIRD_GEAR = 1.1
+    FOURTH_GEAR = 1.3
+    FIFTH_GEAR = 2
+    ECO_BOOST = 5
+    MAX_SPEED = 7
 
     next_index = index + line_of_sight
     next_index = (len(waypoints) - 1) if next_index >= len(waypoints) else next_index
-    points_ahead = waypoints[index:next_index]
+    points_ahead = waypoints[int(index):int(next_index)]
 
     r_value = r_squared(points=points_ahead)
 
