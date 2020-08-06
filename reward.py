@@ -51,12 +51,25 @@ def reward_function(params):
 
     optimal_point = optimal_point(closest_waypoint=closest_waypoint,
                                 next_point=waypoints[ai], prev_point=waypoints[bi],
-                                buffer=1, width_of_track-params['track_width'])
+                                buffer=1, width_of_track=params['track_width'])
+
+    distance_to_optimal = distance(x_, y_, optimal_point)
+
+
 
     # ***** Reward Calculations *****
     if not wheels_on_track:
         # lolz keep them wheelz on the track
         reward -= 100
+
+    if distance_to_optimal < 0.5:
+        # my logic for choosing 50: "50 seems like a good limit"
+        reward += 50
+    else:
+        # car is rewarded more if distance is closer to 0 (exponentially!)
+        reward += (6.25 * math.pow(distance_to_optimal, -3))
+
+
 
     # TODO
 
