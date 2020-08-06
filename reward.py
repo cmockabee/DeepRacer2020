@@ -71,10 +71,10 @@ def reward_function(params):
 
     # **** Param: Speed *****
     # calculate the optimal speed given the waypoints ahead
-    optimal_speed = optimal_speed(waypoints=waypoints, line_of_sight=line_of_sight,
+    best_speed = optimal_speed(waypoints=waypoints, line_of_sight=line_of_sight,
                                 index=closest_index)
 
-    diff_in_speeds = abs(optimal_speed - curr_speed)
+    diff_in_speeds = abs(best_speed - curr_speed)
 
     # ***** Param: Optimal Point *****
     # Calculate optimal point on a curve
@@ -86,11 +86,11 @@ def reward_function(params):
     if bi < 0:
         bi = 0
 
-    optimal_point = optimal_point(closest_waypoint=closest_waypoint,
+    op = optimal_point(closest_waypoint=closest_waypoint,
                                 next_point=waypoints[ai], prev_point=waypoints[bi],
                                 buffer=1, width_of_track=params['track_width'])
 
-    distance_to_optimal = distance(x_, y_, optimal_point)
+    distance_to_optimal = distance(x_, y_, op)
 
     # ***** Reward Calculations *****
     if not wheels_on_track:
