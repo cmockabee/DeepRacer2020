@@ -1,5 +1,4 @@
 import math
-import statistics
 
 def reward_function(params):
     ###############################################################################
@@ -25,6 +24,23 @@ def reward_function(params):
             return 60
         return 110
 
+    # ***** Function: Reward for falling in the range of optimal speed *****
+    def speed_reward(diff_between_speeds):
+        if diff_between_speeds > 20:
+            return 0
+        elif diff_between_speeds > 15:
+            return 10
+        elif diff_between_speeds > 10:
+            return 20
+        elif diff_between_speeds > 7:
+            return 30
+        elif diff_between_speeds > 6:
+            return 40
+        elif diff_between_speeds > 5:
+            return 50
+        elif diff_between_speeds > 4:
+            return 60
+        return 70 # don't jump the speed reward like the position reward
 
     # ***** Parameters & Minor calculations *****
     waypoints = params['waypoints']  # list of (x,y)
@@ -54,8 +70,10 @@ def reward_function(params):
 
     # **** Param: Speed *****
     # calculate the optimal speed given the waypoints ahead
-    optimal_speed = optimal_speed(waypoints=waypoints, line_of_sight=line_of_sight,
+    best_speed = optimal_speed(waypoints=waypoints, line_of_sight=line_of_sight,
                                 index=closest_index)
+
+    diff_in_speeds = abs(best_speed - curr_speed)
 
     # ***** Param: Optimal Point *****
     # Calculate optimal point on a curve
@@ -67,12 +85,11 @@ def reward_function(params):
     if bi < 0:
         bi = 0
 
-    optimal_point = optimal_point(closest_waypoint=closest_waypoint,
+    best_point = optimal_point(closest_waypoint=closest_waypoint,
                                 next_point=waypoints[ai], prev_point=waypoints[bi],
                                 buffer=1, width_of_track=params['track_width'])
 
-    distance_to_optimal = distance(x_, y_, optimal_point)
-
+    distance_to_optimal = distance(car_x=x_, car_y=y_, waypoint=best_point)
 
     # ***** Reward Calculations *****
     if not wheels_on_track:
@@ -82,9 +99,19 @@ def reward_function(params):
     # Positional Reward
     reward += position_reward(distance_to_optimal)
 
-    # TODO
+    # Speed Reward
+    reward += speed_reward(diff_between_speeds=diff_in_speeds)
 
     return reward
+
+
+def mean(data):
+    i = 0
+    agg = 0
+    for elem in data:
+        i += 1
+        agg += elem
+    return (agg / i)
 
 
 def distance(car_x, car_y, waypoint):
@@ -105,14 +132,14 @@ def line_of_best_fit(xs, ys):
     for x in xs:
         x_mult.append(x*x)
 
-    x_mean = statistics.fmean(xs)
-    y_mean = statistics.fmean(ys)
-    mult_mean = statistics.fmean(x_y_mult)
-    x_mult_mean = statistics.fmean(x_mult)
+    x_mean = mean(xs)
+    y_mean = mean(ys)
+    mult_mean = mean(x_y_mult)
+    x_mult_mean = mean(x_mult)
 
     slope = (((x_mean*y_mean) - mult_mean) / ((x_mean*x_mean) - x_mult_mean))
 
-    intercept = statistics.fmean(ys) - slope*statistics.fmean(xs)
+    intercept = mean(ys) - slope*mean(xs)
 
     return slope, intercept
 
@@ -139,13 +166,15 @@ def r_squared(points):
 
         return sum
 
-    y_orig_mean = statistics.fmean(ys)
+    y_orig_mean = mean(ys)
     y_mean_line = []
     for y in ys:
         y_mean_line.append(y_orig_mean)
 
     squared_error_regr = squared_error(ys, best_fit_line)
     squared_error_y_mean = squared_error(ys, y_mean_line)
+
+    squared_error_y_mean = 0.000001 if squared_error_y_mean == 0 else squared_error_y_mean
 
     return 1 - (squared_error_regr/squared_error_y_mean)
 
@@ -201,21 +230,21 @@ def optimal_speed(waypoints, line_of_sight, index):
     next_index = (len(waypoints) - 1) if next_index >= len(waypoints) else next_index
     points_ahead = waypoints[index:next_index]
 
-    r_squared = r_squared(points=points_ahead)
+    r_value = r_squared(points=points_ahead)
 
-    if r_squared < 0.40:
+    if r_value < 0.40:
         return LOW_SPEED
-    elif r_squared < 0.60:
+    elif r_value < 0.60:
         return FIRST_GEAR
-    elif r_squared < 0.70:
+    elif r_value < 0.70:
         return SECOND_GEAR
-    elif r_squared < 0.80:
+    elif r_value < 0.80:
         return THIRD_GEAR
-    elif r_squared < 0.85:
+    elif r_value < 0.85:
         return FOURTH_GEAR
-    elif r_squared < 0.90:
+    elif r_value < 0.90:
         return FIFTH_GEAR
-    elif r_squared < 0.95:
+    elif r_value < 0.95:
         return ECO_BOOST
 
     return MAX_SPEED

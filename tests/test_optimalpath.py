@@ -1,6 +1,6 @@
 
 import math
-
+from DeepRacer2020 import optimal_point
 
 waypoints = [(-3, 1.1), (0, 0.1), (1, 0), (2, 0.1), (5, 1.1)]
 waypoints2 = [(4, 2.4), (1, 1.5), (0, 0), (1, -.6), (4, -1.2)]
