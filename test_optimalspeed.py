@@ -1,3 +1,41 @@
 import math
+from DeepRacer2020 import optimal_speed, distance, r_squared, line_of_best_fit
+
 
 def test_distance():
+    x_1 = 3
+    y_1 = 2
+    point_1 = [9, 7]
+    distance_1 = distance(x_1, y_1, point_1)
+
+    assert round(distance_1, 5) == 7.81025
+
+    x_2 = 21
+    y_2 = 112
+    point_2 = [1, 7]
+    distance_2 = distance(x_2, y_2, point_2)
+
+    assert round(distance_2, 5) == 106.88779
+
+    x_3 = 76
+    y_3 = 13
+    point_3 = [145, 127]
+    distance_3 = distance(x_3, y_3, point_3)
+
+    assert round(distance_3, 5) == 133.25539
+
+
+def test_line_of_best_fit():
+    x_1 = [0, 2, 5, 22]
+    y_1 = [1, 3, 8, 9]
+    slope_1, intercept_1 = line_of_best_fit(xs=x_1, ys=y_1)
+
+    assert round(slope_1, 6) == 0.303055
+    assert round(intercept_1, 6) == 3.052849
+
+    x_2 = [0, 2, 5, 22, 24, 52, 32, 13, 0]
+    y_2 = [1, 3, 8, 9, 15, 23, 13, 1, 0]
+    slope_2, intercept_2 = line_of_best_fit(xs=x_2, ys=y_2)
+
+    assert round(slope_2, 6) == 0.407214
+    assert round(intercept_2, 6) == 1.324216
