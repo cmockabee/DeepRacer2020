@@ -1,11 +1,11 @@
+import math
+import statistics
+
 def reward_function(params):
     ###############################################################################
     '''
     Super Fast Reward function (or not....)
     '''
-
-    import math
-    import statistics
 
     # ***** Parameters & Minor calculations *****
     waypoints = params['waypoints']  # list of (x,y)
@@ -52,10 +52,13 @@ def reward_function(params):
     optimal_point = optimal_point(closest_waypoint=closest_waypoint,
                                 next_point=waypoints[ai], prev_point=waypoints[bi],
                                 buffer=1, width_of_track=params['track_width'])
+<<<<<<< HEAD
 
     distance_to_optimal = distance(x_, y_, optimal_point)
 
 
+=======
+>>>>>>> 18c1f46554dce0aa8ed71c6069b688832e034093
 
     # ***** Reward Calculations *****
     if not wheels_on_track:
@@ -85,6 +88,27 @@ def distance(car_x, car_y, waypoint):
     return math.sqrt(x_ + y_)
 
 
+def line_of_best_fit(xs, ys):
+    x_y_mult = []
+    for (x, y) in zip(xs, ys):
+        x_y_mult.append(x*y)
+
+    x_mult = []
+    for x in xs:
+        x_mult.append(x*x)
+
+    x_mean = statistics.fmean(xs)
+    y_mean = statistics.fmean(ys)
+    mult_mean = statistics.fmean(x_y_mult)
+    x_mult_mean = statistics.fmean(x_mult)
+
+    slope = (((x_mean*y_mean) - mult_mean) / ((x_mean*x_mean) - x_mult_mean))
+
+    intercept = statistics.fmean(ys) - slope*statistics.fmean(xs)
+
+    return slope, intercept
+
+
 def r_squared(points):
     ###############################################################################
     xs = []
@@ -94,22 +118,23 @@ def r_squared(points):
         xs.append(point[0])
         ys.append(point[1])
 
-    slope = (((statistics.mean(xs)*statistics.mean(ys)) - statistics.mean(xs*ys)) /
-         ((statistics.mean(xs)*statistics.mean(xs)) - statistics.mean(xs*xs)))
-
-    intercept = statistics.mean(ys) - slope*statistics.mean(xs)
+    slope, intercept = line_of_best_fit(xs=xs, ys=ys)
 
     best_fit_line = []
     for x in xs:
         best_fit_line.append(((slope*x) + intercept))
 
     def squared_error(ys_orig, ys_line):
-        return sum((ys_line - ys_orig) * (ys_line - ys_orig))
+        sum = 0
+        for (yo, ym) in zip(ys_orig, ys_line):
+            sum += math.pow((yo - ym), 2)
 
-    y_orig_mean = statistics.mean(ys)
-    y__mean_line = []
+        return sum
+
+    y_orig_mean = statistics.fmean(ys)
+    y_mean_line = []
     for y in ys:
-        y__mean_line.append(y_orig_mean)
+        y_mean_line.append(y_orig_mean)
 
     squared_error_regr = squared_error(ys, best_fit_line)
     squared_error_y_mean = squared_error(ys, y_mean_line)
@@ -182,7 +207,7 @@ def optimal_speed(waypoints, line_of_sight, index):
         return FOURTH_GEAR
     elif r_squared < 0.90:
         return FIFTH_GEAR
-    elif r_squared < 0.95
+    elif r_squared < 0.95:
         return ECO_BOOST
 
     return MAX_SPEED

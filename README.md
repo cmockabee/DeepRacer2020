@@ -74,7 +74,7 @@ To calculate the optimal path:
 
 Once the optimal position is found, the car's actual position is compared to the optimal, and a reward is derived.
        
-### Speed Reward
+### Optimal Speed
 This function will reward the car for adjust its speed based on the curvature of the road ahead.
 
 ## Resources
