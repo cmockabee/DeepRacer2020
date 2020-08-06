@@ -64,20 +64,18 @@ To calculate the optimal path:
     Find the closest waypoint
     ---Find PC and PT (these coordinates will be +/- some length from the closest waypoint) 
     ---Find midpoint of line PC-PT
-    Define tangents of points PC and PT
-    ---Define intersection of tangents (point PI) This is the apex of the curve.
-    ---Find leg lengths of right trianges PC/midpoint/PI and PT/midpoint/PI
-    ---Calculate angles PI/PC/midpoint and PI/PT/midpoint (points PC and PT being the center of the angles)
-    -------Find angles O/PC/midpoint and O/PT/midpoint by using complementary angles (90 - previous calculations)
-    ---------Find R for both sides of the curve (curve radii)
-    ---------Find length of line O/PI
-    ------------Find M [M = R(1 - cos(delta/2))]
-    -------------Minimize M as much as possible (subtract track width/2? testing to be done)
-    -------------Define new midpoint on curve *(optimal position)* [the closest waypoint - minimization to edge)
+    ------Find the distance of closest waypoint to midpoint
+    ------Find the slope of closest waypoint to midpoint
+    --------- If distance > width of track / 2: new distance = width of track / 2
+    -------------- Find sine and cosine of slope
+    -------------- optimal_point = (midpoint[x] + c * new_d, midpoint[y] + s * new_d) 
+    --------- else: optimal_point = midpoint
 ```
 
 Once the optimal position is found, the car's actual position is compared to the optimal, and a reward is derived.
        
+### Speed Reward
+This function will reward the car for
 
 ## Resources
 
