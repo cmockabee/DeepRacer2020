@@ -9,29 +9,21 @@ def reward_function(params):
     # ***** Function: Reward for proximity to optimal position *****
     def position_reward(distance_to_optimal, width_of_track, wheels_on_track):
         if distance_to_optimal <= .1 * width_of_track and wheels_on_track:
-            return 80
-        elif distance_to_optimal <= 0.25 * width_of_track and wheels_on_track:
             return 30
+        elif distance_to_optimal <= 0.25 * width_of_track and wheels_on_track:
+            return 12
         elif distance_to_optimal <= 0.5 * width_of_track and wheels_on_track:
-            return 6
+            return 5
         return 0
 
     # ***** Function: Reward for falling in the range of optimal speed *****
     def speed_reward(diff_between_speeds):
-        if diff_between_speeds > 1.0:
+        if diff_between_speeds > 0.80:
             return 0
-        elif diff_between_speeds > 0.90:
-            return 5
         elif diff_between_speeds > 0.60:
-            return 10
+            return 12
         elif diff_between_speeds > 0.30:
-            return 20
-        elif diff_between_speeds > 0.15:
             return 30
-        elif diff_between_speeds > 0.10:
-            return 40
-        elif diff_between_speeds > 0.05:
-            return 50
         return 60 # don't jump the speed reward like the position reward
 
     # ***** Parameters & Minor calculations *****
@@ -85,15 +77,22 @@ def reward_function(params):
     distance_to_optimal = distance(car_x=x_, car_y=y_, waypoint=best_point)
 
     # ***** Reward Calculations *****
-    if not wheels_on_track:
-        # lolz keep them wheelz on the track
-        reward -= 150
+    # Progress
+    if progress == 100:
+        reward += 100
 
     # Positional Reward
     reward += position_reward(distance_to_optimal=distance_to_optimal, width_of_track=params['track_width'], wheels_on_track=wheels_on_track)
 
     # Speed Reward
     reward += speed_reward(diff_between_speeds=diff_in_speeds)
+
+    # Slow Speed Punishment
+    if curr_speed < 1:
+        reward -= 25
+
+    if reward < 1:
+        reward = 0
 
     return reward
 
@@ -187,19 +186,27 @@ def optimal_point(closest_waypoint, next_point, prev_point, buffer, width_of_tra
     midpoint = ((pc[0] + pt[0]) / 2, (pc[1] + pt[1]) / 2)
     d = math.sqrt((midpoint[0] - closest_waypoint[0])**2 + (midpoint[1] - closest_waypoint[1])**2)
 
-    # Slight curve - optimal point is the midpoint of the line
-    if d < width_of_track / 2:
+    # Small distance
+    if d < 0.05 * width_of_track:
         optimal_point = midpoint
+
+    # Slight curve - optimal point is the midpoint of the line
+    elif d < width_of_track / 2:
+        m = (closest_waypoint[1] - midpoint[1]) / (closest_waypoint[0] - midpoint[0])
+        new_d = d + d/width_of_track
+        c = 1 / math.sqrt(1 + m**2)
+        s = m / math.sqrt(1 + m**2)
+        optimal_point = (closest_waypoint[0] + new_d * c, closest_waypoint[1] + new_d * s)
 
     # Vertical curve - rare case that would otherwise cause undefined slope
     elif closest_waypoint[0] == midpoint[0]:
-        new_d = d - width_of_track / 2 - buffer
+        new_d = d + d/width_of_track
         optimal_point = (closest_waypoint[0], closest_waypoint[1] + new_d)
 
     # Typical case - find new points closer to edge to cut curve
     else:
         m = (closest_waypoint[1] - midpoint[1]) / (closest_waypoint[0] - midpoint[0])
-        new_d = width_of_track / 2 - buffer
+        new_d = d + d/width_of_track
         c = 1 / math.sqrt(1 + m**2)
         s = m / math.sqrt(1 + m**2)
         optimal_point = (closest_waypoint[0] + new_d * c, closest_waypoint[1] + new_d * s)
@@ -213,14 +220,11 @@ def optimal_speed(waypoints, line_of_sight, index):
     optimal_speed
     """
     # Set speed suggestions
-    LOW_SPEED = 1.0
-    FIRST_GEAR = 1.2
-    SECOND_GEAR = 1.4
-    THIRD_GEAR = 1.6
-    FOURTH_GEAR = 1.8
-    FIFTH_GEAR = 2.0
-    ECO_BOOST = 2.2
-    MAX_SPEED = 2.4
+    LOW_SPEED = 1.4
+    SECOND_GEAR = 1.55
+    THIRD_GEAR = 1.75
+    ECO_BOOST = 2.0
+    MAX_SPEED = 2.25
 
     next_index = index + line_of_sight
     next_index = (len(waypoints) - 1) if next_index >= len(waypoints) else next_index
@@ -231,15 +235,9 @@ def optimal_speed(waypoints, line_of_sight, index):
     if r_value < 0.40:
         return LOW_SPEED
     elif r_value < 0.60:
-        return FIRST_GEAR
-    elif r_value < 0.70:
         return SECOND_GEAR
     elif r_value < 0.80:
         return THIRD_GEAR
-    elif r_value < 0.85:
-        return FOURTH_GEAR
-    elif r_value < 0.90:
-        return FIFTH_GEAR
     elif r_value < 0.95:
         return ECO_BOOST
 
