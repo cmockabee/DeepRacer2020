@@ -68,10 +68,10 @@ def test_optimal_speed():
     points_1 = [[0,0], [1, 1], [2, 2], [3,3]]
     speed_1 = optimal_speed(waypoints=points_1, line_of_sight=sight_1, index=0)
 
-    assert speed_1 == 50
+    assert speed_1 == 2.4
 
     sight_2 = 9
     points_2 = [[0, 1], [2,3], [5, 8], [22, 9], [24, 15], [52, 23], [32, 13], [13, 1], [0, 0]]
     speed_2 = optimal_speed(waypoints=points_2, line_of_sight=sight_2, index=0)
 
-    assert speed_2 == 35
+    assert speed_2 == 1.8

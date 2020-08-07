@@ -9,7 +9,7 @@ def reward_function(params):
     # ***** Function: Reward for proximity to optimal position *****
     def position_reward(distance_to_optimal, width_of_track, wheels_on_track):
         if distance_to_optimal <= .1 * width_of_track and wheels_on_track:
-            return 60
+            return 80
         elif distance_to_optimal <= 0.25 * width_of_track and wheels_on_track:
             return 30
         elif distance_to_optimal <= 0.5 * width_of_track and wheels_on_track:
@@ -18,21 +18,21 @@ def reward_function(params):
 
     # ***** Function: Reward for falling in the range of optimal speed *****
     def speed_reward(diff_between_speeds):
-        if diff_between_speeds > 2.0:
+        if diff_between_speeds > 1.0:
             return 0
-        elif diff_between_speeds > 1.5:
+        elif diff_between_speeds > 0.90:
+            return 5
+        elif diff_between_speeds > 0.60:
             return 10
-        elif diff_between_speeds > 1.0:
+        elif diff_between_speeds > 0.30:
             return 20
-        elif diff_between_speeds > 0.7:
+        elif diff_between_speeds > 0.15:
             return 30
-        elif diff_between_speeds > 0.6:
+        elif diff_between_speeds > 0.10:
             return 40
-        elif diff_between_speeds > 0.4:
+        elif diff_between_speeds > 0.05:
             return 50
-        elif diff_between_speeds > 0.3:
-            return 60
-        return 70 # don't jump the speed reward like the position reward
+        return 60 # don't jump the speed reward like the position reward
 
     # ***** Parameters & Minor calculations *****
     waypoints = params['waypoints']  # list of (x,y)
@@ -58,8 +58,8 @@ def reward_function(params):
 
     # define some 'arbitrary' values
     reward = 1.0
-    line_of_sight_speed = 12 # net line of site related to waypoints
-    line_of_sight_position = 7 
+    line_of_sight_speed = 7 # net line of site related to waypoints
+    line_of_sight_position = 4
 
     # **** Param: Speed *****
     # calculate the optimal speed given the waypoints ahead
@@ -87,7 +87,7 @@ def reward_function(params):
     # ***** Reward Calculations *****
     if not wheels_on_track:
         # lolz keep them wheelz on the track
-        reward -= 100
+        reward -= 150
 
     # Positional Reward
     reward += position_reward(distance_to_optimal=distance_to_optimal, width_of_track=params['track_width'], wheels_on_track=wheels_on_track)
@@ -130,9 +130,10 @@ def line_of_best_fit(xs, ys):
     mult_mean = mean(x_y_mult)
     x_mult_mean = mean(x_mult)
 
-    denominator = 9999999 if ((x_mean*x_mean) - x_mult_mean) == 0 else ((x_mean*x_mean) - x_mult_mean)
+    possible_denom =  ((x_mean*x_mean) - x_mult_mean)
+    denominator = 9999999 if possible_denom == 0 else possible_denom
 
-    slope = (((x_mean*y_mean) - mult_mean) / denomitor)
+    slope = (((x_mean*y_mean) - mult_mean) / denominator)
 
     intercept = mean(ys) - slope*mean(xs)
 
@@ -212,14 +213,14 @@ def optimal_speed(waypoints, line_of_sight, index):
     optimal_speed
     """
     # Set speed suggestions
-    LOW_SPEED = 0.5
-    FIRST_GEAR = 0.7
-    SECOND_GEAR = 0.9
-    THIRD_GEAR = 1.1
-    FOURTH_GEAR = 1.3
-    FIFTH_GEAR = 2
-    ECO_BOOST = 5
-    MAX_SPEED = 7
+    LOW_SPEED = 1.0
+    FIRST_GEAR = 1.2
+    SECOND_GEAR = 1.4
+    THIRD_GEAR = 1.6
+    FOURTH_GEAR = 1.8
+    FIFTH_GEAR = 2.0
+    ECO_BOOST = 2.2
+    MAX_SPEED = 2.4
 
     next_index = index + line_of_sight
     next_index = (len(waypoints) - 1) if next_index >= len(waypoints) else next_index
