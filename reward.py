@@ -18,21 +18,9 @@ def reward_function(params):
 
     # ***** Function: Reward for falling in the range of optimal speed *****
     def speed_reward(diff_between_speeds):
-        if diff_between_speeds > 1.0:
-            return 0
-        elif diff_between_speeds > 0.90:
-            return 5
-        elif diff_between_speeds > 0.60:
-            return 10
-        elif diff_between_speeds > 0.30:
-            return 20
-        elif diff_between_speeds > 0.15:
+        if diff_between_speeds <= 0.5:
             return 30
-        elif diff_between_speeds > 0.10:
-            return 40
-        elif diff_between_speeds > 0.05:
-            return 50
-        return 60 # don't jump the speed reward like the position reward
+        return 0 # don't jump the speed reward like the position reward
 
     # ***** Parameters & Minor calculations *****
     waypoints = params['waypoints']  # list of (x,y)
@@ -58,8 +46,8 @@ def reward_function(params):
 
     # define some 'arbitrary' values
     reward = 1.0
-    line_of_sight_speed = 7 # net line of site related to waypoints
-    line_of_sight_position = 4
+    line_of_sight_speed = 12 # net line of site related to waypoints
+    line_of_sight_position = 7
 
     # **** Param: Speed *****
     # calculate the optimal speed given the waypoints ahead
@@ -213,14 +201,10 @@ def optimal_speed(waypoints, line_of_sight, index):
     optimal_speed
     """
     # Set speed suggestions
-    LOW_SPEED = 1.0
-    FIRST_GEAR = 1.2
-    SECOND_GEAR = 1.4
-    THIRD_GEAR = 1.6
-    FOURTH_GEAR = 1.8
-    FIFTH_GEAR = 2.0
-    ECO_BOOST = 2.2
-    MAX_SPEED = 2.4
+    MIN_SPEED = 0.8
+    LOW_SPEED = 1.2
+    MIDDLE_SPEED = 1.6
+    ECO_BOOST = 2.0
 
     next_index = index + line_of_sight
     next_index = (len(waypoints) - 1) if next_index >= len(waypoints) else next_index
@@ -228,19 +212,11 @@ def optimal_speed(waypoints, line_of_sight, index):
 
     r_value = r_squared(points=points_ahead)
 
-    if r_value < 0.40:
-        return LOW_SPEED
-    elif r_value < 0.60:
-        return FIRST_GEAR
-    elif r_value < 0.70:
-        return SECOND_GEAR
-    elif r_value < 0.80:
-        return THIRD_GEAR
-    elif r_value < 0.85:
-        return FOURTH_GEAR
+    if r_value < 0.80:
+        return MIN_SPEED
     elif r_value < 0.90:
-        return FIFTH_GEAR
+        return LOW_SPEED
     elif r_value < 0.95:
-        return ECO_BOOST
+        return MIDDLE_SPEED
 
-    return MAX_SPEED
+    return ECO_BOOST
